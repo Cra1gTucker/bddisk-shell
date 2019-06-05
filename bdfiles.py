@@ -1,13 +1,13 @@
 # Contains commands to perform file actions
-
+import requests
 import json
 from datetime import datetime
 
 import bderrno
-def getFileJson(session, bdstoken, path = '/', page = '1', order = 'time', desc = '1'):
+def getFileJson(session, bdstoken, path = '/', page = '1', order = 'name', desc = True):
     params = {
         "order":order,
-        "desc":desc,
+        "desc":True if desc else False,
         "showempty":"0",
         "page":page,
         "num":"100",
@@ -26,7 +26,11 @@ def getFileJson(session, bdstoken, path = '/', page = '1', order = 'time', desc 
     return r_json['list']
 
 # server_mtime is date in unix timestamp
-def listFiles(list_json):
-    for i in range(len(list_json)):
-        print('%8s\t%s\t%s' % (list_json[i]['server_filename'], datetime.fromtimestamp(list_json[i]['server_mtime']).strftime('%Y-%m-%d %H:%M:%S'), str(list_json[i]['size'])))
-
+def listFiles(list_json, long_list = False):
+    if long_list:
+        for file in list_json:
+            print('%8s\t%s\t%s' % (file['server_filename'], datetime.fromtimestamp(file['server_mtime']).strftime('%Y-%m-%d %H:%M:%S'), str(file['size'])))
+    else:
+        for file in list_json:
+            print('%8s' % file['server_filename'])
+        print()

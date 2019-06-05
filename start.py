@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 import requests
-import json
-import re
 import sys
 
 import bderrno
 import login
-import bdfiles
+import repl
 
 print('Starting bddisk-shell...')
 session = requests.Session()
@@ -23,3 +21,8 @@ except bderrno.bdlogin_error:
     exit(2)
 
 print("Welcome to bddisk-shell, " + username + " !")
+try:
+    repl.repl(session, username, bdstoken)
+except KeyboardInterrupt:
+    print("Interrupted by user, exit now.")
+
