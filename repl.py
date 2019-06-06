@@ -4,6 +4,7 @@ import os
 
 import bderrno
 import bdfiles
+import bddl
 
 
 def repl(session, username, bdstoken):
@@ -26,6 +27,10 @@ def repl(session, username, bdstoken):
         elif arg_list[0] == 'cd':
             arg_list.pop(0)
             handle_cd(arg_list, path_stack)
+        elif arg_list[0] == 'restdl':
+            arg_list.pop(0)
+            handle_restdl(arg_list, path_stack, session)
+
 # ls -l -t -s -a [PATH]
 def handle_ls(arg_list, path_stack, session, bdstoken):
     long_list = False
@@ -58,6 +63,10 @@ def handle_ls(arg_list, path_stack, session, bdstoken):
 def handle_cd(arg_list, path_stack):
     # Warning: this function does not check whether the directory exists
     path_stack.append(pathFromArgs(arg_list, path_stack))
+
+def handle_restdl(arg_list, path_stack, session):
+    full_path = pathFromArgs(arg_list, path_stack)
+    bddl.REST_download(session, bddl.REST_params(full_path))
 
 def pathFromArgs(arg_list, path_stack):
     try:

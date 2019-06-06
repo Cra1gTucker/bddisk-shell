@@ -42,11 +42,11 @@ def login(session, bduss_cookie, stoken_cookie):
     username = user_match.group(1)
     return username, bdstoken
 
-def save_cookie(bduss, stoken):
-    with open('cookies.txt', 'w') as cookie_file:
-        print('#HttpOnly_.baidu.com\tTRUE\t/\tFALSE\t0\tBDUSS\t' + bduss, file = cookie_file)
-        print('#HttpOnly_.pan.baidu.com\tTRUE\t/\tFALSE\t0\tSTOKEN\t' + stoken, file = cookie_file)
-
+def save_cookie(bduss, stoken, file = 'cookies.txt'):
+    with open(file, 'w') as cookie_file:
+        print('pcs.baidu.com\tTRUE\t/\tFALSE\t2147483648\tBDUSS\t' + bduss, file = cookie_file)
+        print('pcs.baidu.com\tTRUE\t/\tFALSE\t2147483648\tSTOKEN\t' + stoken, file = cookie_file)
+        
 def read_cookie(file = 'cookies.txt'):
     # will raise FileNotFoundError
     bduss = ''
