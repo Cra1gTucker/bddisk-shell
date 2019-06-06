@@ -47,24 +47,32 @@ def handle_ls(arg_list, path_stack, session, bdstoken):
     except IndexError:
         # no arguments given
         pass
-    
+    realpath = pathFromArgs(arg_list, path_stack)
     try:
-        if arg_list[-1][0] == '/':
-            # absolute path
-            bdfiles.listFiles(bdfiles.getFileJson(session, bdstoken, path = arg_list[-1], order = order, desc = desc), long_list = long_list)
-        else:
-            # relative path
-            bdfiles.listFiles(bdfiles.getFileJson(session, bdstoken, path = path_stack[-1] + arg_list[-1], order = order, desc = desc), long_list = long_list)
+        bdfiles.listFiles(bdfiles.getFileJson(session, bdstoken, path = realpath, order = order, desc = desc), long_list = long_list)
     except FileNotFoundError:
-        print("File not found: '" + arg_list[-1] + "'", file = sys.stderr)
+        print("File not found: '" + realpath + "'", file = sys.stderr)
+    except bderrno.bdlogin_error:
+        print("Login state error!", file = sys.stderr)
 #cd [PATH]
 def handle_cd(arg_list, path_stack):
     # Warning: this function does not check whether the directory exists
+    path_stack.append(pathFromArgs(arg_list, path_stack))
+
+def pathFromArgs(arg_list, path_stack):
     try:
         if arg_list[-1][0] == '/':
-            path_stack.append(arg_list[-1])
+            # absolute path
+            return arg_list[-1]
+        elif arg_list[-1][:2] == '..':
+            # ../
+            return os.path.dirname(path_stack[-1]) if len(arg_list[-1]) == 2 else os.path.dirname(path_stack[-1]) + arg_list[-1][3:]
+        elif arg_list[-1][0] == '-':
+            # no path given
+            return path_stack[-1]
         else:
-            path_stack.append(path_stack[-1] + arg_list[-1])
+            # relative path
+            return path_stack[-1] + arg_list[-1]
     except IndexError:
-        # no path given, do nothing
-        pass
+        # no path or arguments given
+        return path_stack[-1]

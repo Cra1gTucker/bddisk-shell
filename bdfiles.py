@@ -7,7 +7,7 @@ import bderrno
 def getFileJson(session, bdstoken, path = '/', page = '1', order = 'name', desc = True):
     params = {
         "order":order,
-        "desc":True if desc else False,
+        "desc":'1' if desc else '0',
         "showempty":"0",
         "page":page,
         "num":"100",

@@ -2,9 +2,11 @@
 import requests
 import sys
 import os
-
+#TODO check/fix behavior of following 2 lines on: 
+# 1. Cygwin Python running on Windows console
+# 2. pure Windows Python
 cwd = os.getcwd()
-os.chdir(os.path.realpath(__file__))
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 import bderrno
 import login
