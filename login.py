@@ -41,3 +41,28 @@ def login(session, bduss_cookie, stoken_cookie):
     user_match = user_re.search(str(r.content))
     username = user_match.group(1)
     return username, bdstoken
+
+def save_cookie(bduss, stoken):
+    with open('cookies.txt', 'w') as cookie_file:
+        print('#HttpOnly_.baidu.com	TRUE\t/ FALSE\t0\tBDUSS\t' + bduss, file = cookie_file)
+        print('#HttpOnly_.pan.baidu.com	TRUE\t/	FALSE\t0\tSTOKEN' + stoken, file = cookie_file)
+
+def read_cookie(file = 'cookies.txt'):
+    # will raise FileNotFoundError
+    bduss = ''
+    stoken = ''
+    with open(file, 'r') as cookie_file:
+        content = cookie_file.read()
+        bduss_re = re.compile('BDUSS\t([^\n]+)')
+        bduss_match = bduss_re.search(content)
+        if bduss_match:
+            bduss = bduss_match.group(1)
+        else:
+            raise FileNotFoundError
+        stoken_re = re.compile('STOKEN\t([^\n]+)')
+        stoken_match = stoken_re.search(content)
+        if stoken_match:
+            stoken = stoken_match.group(1)
+        else:
+            raise FileNotFoundError
+    return bduss, stoken
