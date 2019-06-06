@@ -29,8 +29,15 @@ def getFileJson(session, bdstoken, path = '/', page = '1', order = 'name', desc 
 def listFiles(list_json, long_list = False):
     if long_list:
         for file in list_json:
-            print('%8s\t%s\t%s' % (file['server_filename'], datetime.fromtimestamp(file['server_mtime']).strftime('%Y-%m-%d %H:%M:%S'), str(file['size'])))
+            print('%24s\t%s\t%s' % (file['server_filename'], datetime.fromtimestamp(file['server_mtime']).strftime('%Y-%m-%d %H:%M:%S'), str(file['size'])))
     else:
         for file in list_json:
-            print('%8s' % file['server_filename'])
-        print()
+            print('%s' % file['server_filename'])
+
+def deleteFiles(session, bdstoken, file_list):
+    dataStr = 'filelist=["' + file_list[0] + '"'
+    for items in file_list[1:]:
+        dataStr += (',"' + items + '"')
+    dataStr += ']'
+    r_json = json.loads(session.post('https://pan.baidu.com/api/filemanager?opera=delete&async=2&onnest=fail&channel=chunlei&web=1&app_id=250528&bdstoken=' + bdstoken + '&clienttype=0', headers = {"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"}, data = bytes(dataStr, 'utf-8')).content)
+    bderrno.bderrno(r_json)

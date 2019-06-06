@@ -1,4 +1,3 @@
-import json
 import sys
 import os
 
@@ -11,7 +10,7 @@ def repl(session, username, bdstoken):
     cmd = ''
     path_stack = ['/']
     while cmd != 'exit':
-        print(username + '@bddisk:' + path_stack[-1] + ' $ ', end = '')
+        print('\033[92m' + username + '@bddisk\033[0m:\033[94m' + path_stack[-1] + ' \033[0m$ ', end = '')
         cmd = input()
         arg_list = cmd.split()
         if arg_list[0] == 'ls':
@@ -30,6 +29,9 @@ def repl(session, username, bdstoken):
         elif arg_list[0] == 'restdl':
             arg_list.pop(0)
             handle_restdl(arg_list, path_stack, session)
+        elif arg_list[0] == 'rm':
+            arg_list.pop(0)
+            handle_rm(arg_list, path_stack, session, bdstoken)
 
 # ls -l -t -s -a [PATH]
 def handle_ls(arg_list, path_stack, session, bdstoken):
@@ -47,7 +49,7 @@ def handle_ls(arg_list, path_stack, session, bdstoken):
             elif arg == '-a':
                 desc = False
             else:
-                print("Invalid argument: '" + arg + "'", file = sys.stderr)
+                print("\033[91mInvalid argument: '" + arg + "'\033[0m", file = sys.stderr)
                 return
     except IndexError:
         # no arguments given
@@ -56,9 +58,7 @@ def handle_ls(arg_list, path_stack, session, bdstoken):
     try:
         bdfiles.listFiles(bdfiles.getFileJson(session, bdstoken, path = realpath, order = order, desc = desc), long_list = long_list)
     except FileNotFoundError:
-        print("File not found: '" + realpath + "'", file = sys.stderr)
-    except bderrno.bdlogin_error:
-        print("Login state error!", file = sys.stderr)
+        print("\033[91mFile not found: '" + realpath + "'\033[0m", file = sys.stderr)
 #cd [PATH]
 def handle_cd(arg_list, path_stack):
     # Warning: this function does not check whether the directory exists
@@ -67,6 +67,17 @@ def handle_cd(arg_list, path_stack):
 def handle_restdl(arg_list, path_stack, session):
     full_path = pathFromArgs(arg_list, path_stack)
     bddl.REST_download(session, bddl.REST_params(full_path))
+# rm [FILE1] [FILE2] ...
+# Warning: BaiduNetDisk doesn't report error when at least one action is successful
+# so unless all files given are not found, no error will be reported
+def handle_rm(arg_list, path_stack, session, bdstoken):
+    file_list = []
+    for arg in arg_list:
+        file_list.append(pathFromArgs([arg], path_stack))
+    try:
+        bdfiles.deleteFiles(session, bdstoken, file_list)
+    except FileNotFoundError:
+        print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
 
 def pathFromArgs(arg_list, path_stack):
     try:

@@ -24,15 +24,32 @@ bduss_cookie, stoken_cookie = login.gen_cookie(bduss, stoken)
 try:
     username, bdstoken = login.login(session, bduss_cookie, stoken_cookie)
 except bderrno.bdhttp_error:
-    print("Couldn't connect to BaiduNetDisk!", file = sys.stderr)
+    print("\033[91mCouldn't connect to BaiduNetDisk!\033[0m", file = sys.stderr)
     exit(1)
 except bderrno.bdlogin_error:
-    print("Login incorrect.", file = sys.stderr)
+    print("\033[91mLogin incorrect.\033[0m", file = sys.stderr)
     exit(2)
-
-print("Welcome to bddisk-shell, " + username + " !")
+print('\033[1m\033[93m', end = '')
+print('''
+ __              __        __  __            __       
+/  |            /  |      /  |/  |          /  |      
+$$ |____    ____$$ |  ____$$ |$$/   _______ $$ |   __ 
+$$      \  /    $$ | /    $$ |/  | /       |$$ |  /  |
+$$$$$$$  |/$$$$$$$ |/$$$$$$$ |$$ |/$$$$$$$/ $$ |_/$$/ 
+$$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |$$      \ $$   $$<  
+$$ |__$$ |$$ \__$$ |$$ \__$$ |$$ | $$$$$$  |$$$$$$  \ 
+$$    $$/ $$    $$ |$$    $$ |$$ |/     $$/ $$ | $$  |
+$$$$$$$/   $$$$$$$/  $$$$$$$/ $$/ $$$$$$$/  $$/   $$/ 
+                                                      
+\033[0m
+'''
+)
+print("Welcome to bddisk-shell, \033[4m" + username + "\033[0m !")
 try:
     repl.repl(session, username, bdstoken)
+except bderrno.bdlogin_error:
+    print("\033[91mLogin state error! Exit now.\033[0m")
+    exit(3)
 except KeyboardInterrupt:
     print("Interrupted by user, exit now.")
 
