@@ -2,9 +2,11 @@
 import requests
 import sys
 import os
+#from colorama import init
+#init()
 #TODO check/fix behavior of following 2 lines on: 
-# 1. Cygwin Python running on Windows console
-# 2. pure Windows Python
+# 1. Cygwin Python running on Windows console: fails
+# 2. pure Windows Python: works when executed with exe, fails when called in cmd
 cwd = os.getcwd()
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 

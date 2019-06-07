@@ -6,9 +6,9 @@ import re
 
 import bderrno
 def cookie_prompt():
-    print("Enter BDUSS value:")
+    print("Enter BDUSS value:", end = '')
     bduss = input()
-    print("Enter STOKEN value:")
+    print("Enter STOKEN value:", end = '')
     stoken = input()
     return bduss, stoken
 
