@@ -46,7 +46,7 @@ $$$$$$$/   $$$$$$$/  $$$$$$$/ $$/ $$$$$$$/  $$/   $$/
 )
 print("Welcome to bddisk-shell, \033[4m" + username + "\033[0m !")
 try:
-    repl.repl(session, username, bdstoken)
+    repl.repl(session, username, bdstoken, cwd)
 except bderrno.bdlogin_error:
     print("\033[91mLogin state error! Exit now.\033[0m")
     exit(3)

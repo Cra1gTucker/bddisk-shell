@@ -5,14 +5,16 @@ import bderrno
 import bdfiles
 import bddl
 
-
-def repl(session, username, bdstoken):
+def repl(session, username, bdstoken, cwd):
     cmd = ''
     path_stack = ['/']
     while cmd != 'exit':
         print('\033[92m' + username + '@bddisk\033[0m:\033[94m' + path_stack[-1] + ' \033[0m$ ', end = '')
         cmd = input()
         arg_list = cmd.split()
+        if len(arg_list) == 0:
+            print()
+            continue
         if arg_list[0] == 'ls':
             arg_list.pop(0)
             try:
@@ -26,9 +28,12 @@ def repl(session, username, bdstoken):
         elif arg_list[0] == 'cd':
             arg_list.pop(0)
             handle_cd(arg_list, path_stack)
+        elif arg_list[0] == 'clientdl':
+            arg_list.pop(0)
+            handle_clientdl(arg_list, path_stack, session, cwd)
         elif arg_list[0] == 'restdl':
             arg_list.pop(0)
-            handle_restdl(arg_list, path_stack, session)
+            handle_restdl(arg_list, path_stack, session, cwd)
         elif arg_list[0] == 'rm':
             arg_list.pop(0)
             handle_rm(arg_list, path_stack, session, bdstoken)
@@ -59,14 +64,20 @@ def handle_ls(arg_list, path_stack, session, bdstoken):
         bdfiles.listFiles(bdfiles.getFileJson(session, bdstoken, path = realpath, order = order, desc = desc), long_list = long_list)
     except FileNotFoundError:
         print("\033[91mFile not found: '" + realpath + "'\033[0m", file = sys.stderr)
-#cd [PATH]
+# cd [PATH]
 def handle_cd(arg_list, path_stack):
     # Warning: this function does not check whether the directory exists
     path_stack.append(pathFromArgs(arg_list, path_stack))
-
-def handle_restdl(arg_list, path_stack, session):
+# restdl [LOCATION] [FILE]
+def handle_restdl(arg_list, path_stack, session, cwd):
     full_path = pathFromArgs(arg_list, path_stack)
-    bddl.REST_download(session, bddl.REST_params(full_path))
+    os.chdir(cwd)
+    try:
+        loc = arg_list[-2]
+    except IndexError:
+        loc = '.'
+    bddl.REST_download(session, bddl.REST_params(full_path), dest = loc)
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
 # rm [FILE1] [FILE2] ...
 # Warning: BaiduNetDisk doesn't report error when at least one action is successful
 # so unless all files given are not found, no error will be reported
@@ -78,6 +89,16 @@ def handle_rm(arg_list, path_stack, session, bdstoken):
         bdfiles.deleteFiles(session, bdstoken, file_list)
     except FileNotFoundError:
         print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
+# vipdl [LOCATION] [FILE]
+def handle_clientdl(arg_list, path_stack, session, cwd):
+    os.chdir(cwd)
+    full_path = pathFromArgs(arg_list, path_stack)
+    try:
+        loc = arg_list[-2]
+    except IndexError:
+        loc = '.'
+    bddl.ClientAPI_dl(session, full_path, dest = loc)
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 def pathFromArgs(arg_list, path_stack):
     try:
@@ -92,7 +113,7 @@ def pathFromArgs(arg_list, path_stack):
             return path_stack[-1]
         else:
             # relative path
-            return path_stack[-1] + arg_list[-1]
+            return ('/' + arg_list[-1]) if path_stack[-1] == '/' else (path_stack[-1] + '/' + arg_list[-1])
     except IndexError:
         # no path or arguments given
         return path_stack[-1]

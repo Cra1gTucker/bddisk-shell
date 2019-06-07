@@ -29,7 +29,7 @@ def login(session, bduss_cookie, stoken_cookie):
     print('Logging in...')
     r = session.get('https://pan.baidu.com/')
     # when calling, set User-Agent to '' because requests UA is banned
-    if r.status_code > 400:
+    if r.status_code >= 400:
         raise bderrno.bdhttp_error
     bds_re = re.compile('"bdstoken"\s*:\s*"([^"]+)"', re.IGNORECASE)
     bds_match = bds_re.search(str(r.content))
