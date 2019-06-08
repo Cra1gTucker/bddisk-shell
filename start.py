@@ -2,13 +2,13 @@
 import requests
 import sys
 import os
+import pathlib
 #from colorama import init
 #init()
-#TODO check/fix behavior of following 2 lines on: 
-# 1. Cygwin Python running on Windows console: fails
-# 2. pure Windows Python: works when executed with exe, fails when called in cmd
-cwd = os.getcwd()
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+# known issues:
+# Cygwin Python running on Windows console: fails
+cwd = pathlib.PurePath(os.getcwd())
+os.chdir(os.path.dirname(pathlib.PurePath(os.path.realpath(__file__))))
 
 import bderrno
 import login
@@ -32,7 +32,7 @@ except bderrno.bdlogin_error:
     print("\033[91mLogin incorrect.\033[0m", file = sys.stderr)
     exit(2)
 print('\033[1m\033[93m', end = '')
-print('''
+print(r'''
  __              __        __  __            __       
 /  |            /  |      /  |/  |          /  |      
 $$ |____    ____$$ |  ____$$ |$$/   _______ $$ |   __ 
@@ -43,9 +43,9 @@ $$ |__$$ |$$ \__$$ |$$ \__$$ |$$ | $$$$$$  |$$$$$$  \
 $$    $$/ $$    $$ |$$    $$ |$$ |/     $$/ $$ | $$  |
 $$$$$$$/   $$$$$$$/  $$$$$$$/ $$/ $$$$$$$/  $$/   $$/ 
                                                       
-\033[0m
 '''
 )
+print('\033[0m', end = '')
 print("Welcome to bddisk-shell, \033[4m" + username + "\033[0m !")
 try:
     repl.repl(session, username, bdstoken, cwd)

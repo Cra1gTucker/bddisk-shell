@@ -20,7 +20,7 @@ def REST_params(full_path):
 def REST_download(session, paramstr, dest = '.'):
     # aria2 will report error, so don't raise FileNotFoundError
     cookieHeader = 'Cookie: BAIDUID=' + requests.utils.dict_from_cookiejar(session.cookies)['BAIDUID'] + '; BDUSS=' + requests.utils.dict_from_cookiejar(session.cookies)['BDUSS'] + '; cflag=13%3A3'
-    os.system('aria2c -x 16 -d "' + dest + '" --header "' + cookieHeader + '" "https://pcs.baidu.com/rest/2.0/pcs/file?' + paramstr + '"')
+    os.system('aria2c -s 16 -d "' + dest + '" --header "' + cookieHeader + '" "https://pcs.baidu.com/rest/2.0/pcs/file?' + paramstr + '"')
 
 def ClientAPI_dl(session, full_path, dest = '.'):
     query = {
@@ -55,4 +55,4 @@ def ClientAPI_dl(session, full_path, dest = '.'):
         urls_str += ('"' + url_dict['url'] + '" ')
     print('\033[92mWaiting 5 seconds to allow server preparation.\033[0m')
     sleep(5)
-    os.system('aria2c -x 16 -d "' + dest + '" -U "netdisk;6.7.4.2;PC;PC-Windows;10.0.17763;WindowsBaiduYunGuanJia" ' + urls_str)
+    os.system('aria2c -s 16 -d "' + dest + '" -U "netdisk;6.7.4.2;PC;PC-Windows;10.0.17763;WindowsBaiduYunGuanJia" ' + urls_str)

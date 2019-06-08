@@ -1,5 +1,6 @@
 import sys
 import os
+import pathlib
 
 import bderrno
 import bdfiles
@@ -11,12 +12,12 @@ def repl(session, username, bdstoken, cwd):
     while cmd != 'exit':
         print('\033[92m' + username + '@bddisk\033[0m:\033[94m' + path_stack[-1] + ' \033[0m$ ', end = '')
         cmd = input()
-        arg_list = cmd.split()
+        arg_list = trimArgs(cmd)
         if len(arg_list) == 0:
             print()
             continue
-        if arg_list[0] == 'ls':
-            arg_list.pop(0)
+        verb = arg_list.pop(0)
+        if verb == 'ls':
             try:
                 if arg_list[-1][0] == '-':
                     # no path given
@@ -25,18 +26,19 @@ def repl(session, username, bdstoken, cwd):
                 # no path or arguments given
                 arg_list.append(path_stack[-1])
             handle_ls(arg_list, path_stack, session, bdstoken)
-        elif arg_list[0] == 'cd':
-            arg_list.pop(0)
+        elif verb == 'cd':
             handle_cd(arg_list, path_stack)
-        elif arg_list[0] == 'clientdl':
-            arg_list.pop(0)
+        elif verb == 'clientdl':
             handle_clientdl(arg_list, path_stack, session, cwd)
-        elif arg_list[0] == 'restdl':
-            arg_list.pop(0)
+        elif verb == 'restdl':
             handle_restdl(arg_list, path_stack, session, cwd)
-        elif arg_list[0] == 'rm':
-            arg_list.pop(0)
+        elif verb == 'rm':
             handle_rm(arg_list, path_stack, session, bdstoken)
+        elif verb == 'rename':
+            handle_rename(arg_list, path_stack, session, bdstoken)
+        elif verb == 'cp':
+            handle_cp(arg_list, path_stack, session, bdstoken)
+
 
 # ls -l -t -s -a [PATH]
 def handle_ls(arg_list, path_stack, session, bdstoken):
@@ -77,7 +79,7 @@ def handle_restdl(arg_list, path_stack, session, cwd):
     except IndexError:
         loc = '.'
     bddl.REST_download(session, bddl.REST_params(full_path), dest = loc)
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    os.chdir(os.path.dirname(pathlib.PurePath(os.path.realpath(__file__))))
 # rm [FILE1] [FILE2] ...
 # Warning: BaiduNetDisk doesn't report error when at least one action is successful
 # so unless all files given are not found, no error will be reported
@@ -89,7 +91,7 @@ def handle_rm(arg_list, path_stack, session, bdstoken):
         bdfiles.deleteFiles(session, bdstoken, file_list)
     except FileNotFoundError:
         print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
-# vipdl [LOCATION] [FILE]
+# clientdl [LOCATION] [FILE]
 def handle_clientdl(arg_list, path_stack, session, cwd):
     os.chdir(cwd)
     full_path = pathFromArgs(arg_list, path_stack)
@@ -98,7 +100,36 @@ def handle_clientdl(arg_list, path_stack, session, cwd):
     except IndexError:
         loc = '.'
     bddl.ClientAPI_dl(session, full_path, dest = loc)
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    os.chdir(os.path.dirname(pathlib.PurePath(os.path.realpath(__file__))))
+# rename [FILE] [NEWNAME]
+def handle_rename(arg_list, path_stack, session, bdstoken):
+    if len(arg_list) == 2:
+        full_path = pathFromArgs(arg_list[:1], path_stack)
+        try:
+            bdfiles.renameFile(session, bdstoken, full_path, arg_list[1])
+        except FileNotFoundError:
+            print("\033[91mFile not found: '" + full_path + "'\033[0m", file = sys.stderr)
+    else:
+        print('\033[93mUsage: rename [FILE] [NEWNAME]\033[0m', file = sys.stderr)
+# cp [FILE] [DEST] [NEWNAME]
+def handle_cp(arg_list, path_stack, session, bdstoken):
+    if len(arg_list) == 2:
+        dest = pathFromArgs(arg_list, path_stack)
+        full_path = pathFromArgs(arg_list[:-1], path_stack)
+        try:
+            bdfiles.copyFile(session, bdstoken, full_path, dest, os.path.basename(full_path))
+        except FileNotFoundError:
+            print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
+    elif len(arg_list) == 3:
+        newname = arg_list[-1]
+        dest = pathFromArgs(arg_list[:-1], path_stack)
+        full_path = pathFromArgs(arg_list[:-2], path_stack)
+        try:
+            bdfiles.copyFile(session, bdstoken, full_path, dest, newname)
+        except FileNotFoundError:
+            print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
+    else:
+        print('\033[93mUsage: cp [FILE] [DEST] [NEWNAME]\033[0m', file = sys.stderr)
 
 def pathFromArgs(arg_list, path_stack):
     try:
@@ -117,3 +148,28 @@ def pathFromArgs(arg_list, path_stack):
     except IndexError:
         # no path or arguments given
         return path_stack[-1]
+
+def trimArgs(cmd):
+    arg_list = []
+    inQuote = False
+    arg = ''
+    for char in cmd:
+        if char == ' ':
+            if not inQuote:
+                if arg != '':
+                    arg_list.append(arg)
+                    arg = ''
+            else:
+                arg += char
+        elif char == '"':
+            inQuote = not inQuote
+            if not inQuote:
+                if arg != '':
+                    arg_list.append(arg)
+                    arg = ''
+        else:
+            arg += char
+    if arg != '':
+        arg_list.append(arg)
+    return arg_list
+        
