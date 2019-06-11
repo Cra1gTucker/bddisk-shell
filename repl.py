@@ -6,7 +6,13 @@ import bderrno
 import bdfiles
 import bddl
 
-def repl(session, username, bdstoken, cwd):
+def repl(session, username, bdstoken):
+    cwd = pathlib.PurePath(os.getcwd())
+    print('\033[92mChecking aria2c...\033[0m')
+    aria2_path = 'aria2c'
+    if os.system('which aria2c') and os.system('where aria2c'):
+        aria2_path = str(pathlib.PurePath(pathlib.PurePath(os.path.realpath(__file__)).parent, 'aria2c'))
+    os.chdir(pathlib.PurePath(os.path.realpath(__file__)).parent)
     cmd = ''
     path_stack = ['/']
     while cmd != 'exit':
@@ -29,9 +35,9 @@ def repl(session, username, bdstoken, cwd):
         elif verb == 'cd':
             handle_cd(arg_list, path_stack)
         elif verb == 'clientdl':
-            handle_clientdl(arg_list, path_stack, session, cwd)
+            handle_clientdl(arg_list, path_stack, session, cwd, aria2_path)
         elif verb == 'restdl':
-            handle_restdl(arg_list, path_stack, session, cwd)
+            handle_restdl(arg_list, path_stack, session, cwd, aria2_path)
         elif verb == 'rm':
             handle_rm(arg_list, path_stack, session, bdstoken)
         elif verb == 'rename':
@@ -71,14 +77,15 @@ def handle_cd(arg_list, path_stack):
     # Warning: this function does not check whether the directory exists
     path_stack.append(pathFromArgs(arg_list, path_stack))
 # restdl [LOCATION] [FILE]
-def handle_restdl(arg_list, path_stack, session, cwd):
+def handle_restdl(arg_list, path_stack, session, cwd, aria2_path):
     full_path = pathFromArgs(arg_list, path_stack)
     os.chdir(cwd)
+    loc = ''
     try:
         loc = arg_list[-2]
     except IndexError:
-        loc = '.'
-    bddl.REST_download(session, bddl.REST_params(full_path), dest = loc)
+        loc = str(cwd)
+    bddl.REST_download(session, bddl.REST_params(full_path), aria2_path, dest = loc)
     os.chdir(os.path.dirname(pathlib.PurePath(os.path.realpath(__file__))))
 # rm [FILE1] [FILE2] ...
 # Warning: BaiduNetDisk doesn't report error when at least one action is successful
@@ -92,14 +99,15 @@ def handle_rm(arg_list, path_stack, session, bdstoken):
     except FileNotFoundError:
         print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
 # clientdl [LOCATION] [FILE]
-def handle_clientdl(arg_list, path_stack, session, cwd):
+def handle_clientdl(arg_list, path_stack, session, cwd, aria2_path):
     os.chdir(cwd)
     full_path = pathFromArgs(arg_list, path_stack)
+    loc = ''
     try:
         loc = arg_list[-2]
     except IndexError:
-        loc = '.'
-    bddl.ClientAPI_dl(session, full_path, dest = loc)
+        loc = str(cwd)
+    bddl.ClientAPI_dl(session, full_path, aria2_path, dest = loc)
     os.chdir(os.path.dirname(pathlib.PurePath(os.path.realpath(__file__))))
 # rename [FILE] [NEWNAME]
 def handle_rename(arg_list, path_stack, session, bdstoken):

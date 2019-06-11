@@ -17,12 +17,12 @@ def REST_params(full_path):
         'app_id':'498065'
     })
 
-def REST_download(session, paramstr, dest = '.'):
+def REST_download(session, paramstr, aria2_path, dest = '.'):
     # aria2 will report error, so don't raise FileNotFoundError
     cookieHeader = 'Cookie: BAIDUID=' + requests.utils.dict_from_cookiejar(session.cookies)['BAIDUID'] + '; BDUSS=' + requests.utils.dict_from_cookiejar(session.cookies)['BDUSS'] + '; cflag=13%3A3'
-    os.system('aria2c -s 16 -d "' + dest + '" --header "' + cookieHeader + '" "https://pcs.baidu.com/rest/2.0/pcs/file?' + paramstr + '"')
+    os.system(str(aria2_path) + ' -s 16 -d "' + dest + '" --header "' + cookieHeader + '" "https://pcs.baidu.com/rest/2.0/pcs/file?' + paramstr + '"')
 
-def ClientAPI_dl(session, full_path, dest = '.'):
+def ClientAPI_dl(session, full_path, aria2_path, dest = '.'):
     query = {
         'app_id':'250528',
         'channel':'00000000000000000000000000000000',
@@ -55,4 +55,5 @@ def ClientAPI_dl(session, full_path, dest = '.'):
         urls_str += ('"' + url_dict['url'] + '" ')
     print('\033[92mWaiting 5 seconds to allow server preparation.\033[0m')
     sleep(5)
-    os.system('aria2c -s 16 -d "' + dest + '" -U "netdisk;6.7.4.2;PC;PC-Windows;10.0.17763;WindowsBaiduYunGuanJia" ' + urls_str)
+    os.system(str(aria2_path) + ' -s 16 -d "' + dest + '" -U "netdisk;6.7.4.2;PC;PC-Windows;10.0.17763;WindowsBaiduYunGuanJia" ' + urls_str)
+
