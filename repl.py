@@ -2,9 +2,10 @@ import sys
 import os
 import pathlib
 
-import bderrno
 import bdfiles
 import bddl
+import bderrno
+import bdshare
 
 def repl(session, username, bdstoken):
     cwd = pathlib.PurePath(os.getcwd())
@@ -44,6 +45,12 @@ def repl(session, username, bdstoken):
             handle_rename(arg_list, path_stack, session, bdstoken)
         elif verb == 'cp':
             handle_cp(arg_list, path_stack, session, bdstoken)
+        elif verb == 'getshare':
+            handle_getshare(arg_list, session, bdstoken)
+        elif verb == 'exit':
+            pass
+        else:
+            print("\033[91mUnknown command: " + verb + "\033[0m", file = sys.stderr)
 
 
 # ls -l -t -s -a [PATH]
@@ -138,6 +145,20 @@ def handle_cp(arg_list, path_stack, session, bdstoken):
             print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
     else:
         print('\033[93mUsage: cp [FILE] [DEST] [NEWNAME]\033[0m', file = sys.stderr)
+
+# getshare [surl] [passcode]
+def handle_getshare(arg_list, session, bdstoken):
+    if len(arg_list) == 2:
+        surl = arg_list[0] if len(arg_list[0]) == 22 else arg_list[0][1:]
+        pwd = arg_list[1]
+        try:
+            bdshare.verifyShare(session, bdstoken, surl, pwd)
+        except FileNotFoundError:
+            print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
+        except bderrno.bdvcode_error:
+            print('\033[91mVerification code is required. Cannot verify on commandline!\033[0m', file = sys.stderr)
+    else:
+        print('\033[93mUsage: getshare [SURL] [PASSCODE]\033[0m', file = sys.stderr)
 
 def pathFromArgs(arg_list, path_stack):
     try:

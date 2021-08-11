@@ -53,7 +53,7 @@ def ClientAPI_dl(session, full_path, aria2_path, dest = '.'):
     urls_str = ''
     for url_dict in url_list:
         urls_str += ('"' + url_dict['url'] + '" ')
-    print('\033[92mWaiting 5 seconds to allow server preparation.\033[0m')
-    sleep(5)
+    print('\033[92mWaiting 3 seconds to allow server preparation.\033[0m')
+    sleep(3)
     os.system(str(aria2_path) + ' -s 16 -d "' + dest + '" -U "netdisk;6.7.4.2;PC;PC-Windows;10.0.17763;WindowsBaiduYunGuanJia" ' + urls_str)
 

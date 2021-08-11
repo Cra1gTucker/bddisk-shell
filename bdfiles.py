@@ -1,5 +1,4 @@
 # Contains commands to perform file actions
-import requests
 import json
 from datetime import datetime
 

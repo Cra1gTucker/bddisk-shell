@@ -1,7 +1,6 @@
 # Contains code to login to BaiduNetDisk
 # We need two cookies to login, they are BDUSS and STOKEN
 
-import requests
 import re
 
 import bderrno
