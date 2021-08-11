@@ -1,6 +1,6 @@
 # download commands
 import random
-import requests
+from requests.utils import dict_from_cookiejar
 import os
 import urllib.parse
 import json
@@ -19,7 +19,7 @@ def REST_params(full_path):
 
 def REST_download(session, paramstr, aria2_path, dest = '.'):
     # aria2 will report error, so don't raise FileNotFoundError
-    cookieHeader = 'Cookie: BAIDUID=' + requests.utils.dict_from_cookiejar(session.cookies)['BAIDUID'] + '; BDUSS=' + requests.utils.dict_from_cookiejar(session.cookies)['BDUSS'] + '; cflag=13%3A3'
+    cookieHeader = 'Cookie: BAIDUID=' + dict_from_cookiejar(session.cookies)['BAIDUID'] + '; BDUSS=' + dict_from_cookiejar(session.cookies)['BDUSS'] + '; cflag=13%3A3'
     os.system(str(aria2_path) + ' -s 16 -d "' + dest + '" --header "' + cookieHeader + '" "https://pcs.baidu.com/rest/2.0/pcs/file?' + paramstr + '"')
 
 def ClientAPI_dl(session, full_path, aria2_path, dest = '.'):

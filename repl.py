@@ -47,6 +47,8 @@ def repl(session, username, bdstoken):
             handle_cp(arg_list, path_stack, session, bdstoken)
         elif verb == 'getshare':
             handle_getshare(arg_list, session, bdstoken)
+        elif verb == 'transfer':
+            handle_transfer(arg_list, path_stack, session, bdstoken)
         elif verb == 'exit':
             pass
         else:
@@ -154,11 +156,25 @@ def handle_getshare(arg_list, session, bdstoken):
         try:
             bdshare.verifyShare(session, bdstoken, surl, pwd)
         except FileNotFoundError:
-            print('\033[91mFile(s) not found.\033[0m', file = sys.stderr)
+            print('\033[91mCannot find shared file(s) or wrong passcode.\033[0m', file = sys.stderr)
         except bderrno.bdvcode_error:
             print('\033[91mVerification code is required. Cannot verify on commandline!\033[0m', file = sys.stderr)
     else:
         print('\033[93mUsage: getshare [SURL] [PASSCODE]\033[0m', file = sys.stderr)
+
+# transfer [surl] [DEST]
+def handle_transfer(arg_list, path_stack, session, bdstoken):
+    if len(arg_list) == 2:
+        surl =  '1' + arg_list[0] if len(arg_list[0]) == 22 else arg_list[0]
+        dest = pathFromArgs(arg_list, path_stack)
+        try:
+            bdshare.transferShare(session, bdstoken, surl, dest)
+        except FileNotFoundError:
+            print('\033[91mCannot find shared file(s).\033[0m', file = sys.stderr)
+        except PermissionError:
+            print('\033[91mNo access to private shared file(s)! Run getshare first!\033[0m', file = sys.stderr)
+    else:
+        print('\033[93mUsage: transfer [SURL] [DEST]\033[0m', file = sys.stderr)
 
 def pathFromArgs(arg_list, path_stack):
     try:
