@@ -49,6 +49,8 @@ def repl(session, username, bdstoken):
             handle_getshare(arg_list, session, bdstoken)
         elif verb == 'transfer':
             handle_transfer(arg_list, path_stack, session, bdstoken)
+        elif verb == 'mkdir':
+            handle_mkdir(arg_list, path_stack, session, bdstoken)
         elif verb == 'exit':
             pass
         else:
@@ -175,6 +177,16 @@ def handle_transfer(arg_list, path_stack, session, bdstoken):
             print('\033[91mNo access to private shared file(s)! Run getshare first!\033[0m', file = sys.stderr)
     else:
         print('\033[93mUsage: transfer [SURL] [DEST]\033[0m', file = sys.stderr)
+
+def handle_mkdir(arg_list, path_stack, session, bdstoken):
+    if len(arg_list) == 1:
+        full_path = pathFromArgs(arg_list, path_stack)
+        try:
+            bdfiles.newFolder(session, bdstoken, full_path)
+        except FileNotFoundError:
+            print('\033[91mInvalid path!\033[0m', file = sys.stderr)
+    else:
+        print('\033[93mUsage: mkdir [PATH]\033[0m', file = sys.stderr)
 
 def pathFromArgs(arg_list, path_stack):
     try:

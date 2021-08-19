@@ -50,3 +50,8 @@ def copyFile(session, bdstoken, full_path, dest, newname):
     dataStr = 'filelist=[{"path":"' + full_path + '","dest":"' + dest + '","newname":"' + newname + '"}]'
     r_json = json.loads(session.post('https://pan.baidu.com/api/filemanager?opera=copy&async=2&onnest=fail&channel=chunlei&web=1&app_id=250528&bdstoken=' + bdstoken + '&clienttype=0', headers = {"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"}, data = bytes(dataStr, 'utf-8')).content)
     bderrno.bderrno(r_json)
+
+def newFolder(session, bdstoken, full_path):
+    dataStr = 'path=' + full_path + '&isdir=1&block_list=[]'
+    r_json = json.loads(session.post('https://pan.baidu.com/api/create?a=commit&channel=chunlei&web=1&app_id=250528&bdstoken=' + bdstoken + '&clienttype=0', headers = {"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"}, data = bytes(dataStr, 'utf-8')).content)
+    bderrno.bderrno(r_json)

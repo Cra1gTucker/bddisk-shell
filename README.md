@@ -28,9 +28,10 @@ Once you've logged in, you can use familiar commands to navigate and operate, th
 
 * `ls`: The `-l` switch and sorting switches `-s`, `-t`, `-a` are supported. But please pass them separately as in `ls -l -s ../`.
 * `cd`: Changes working directory. **Warning:** This doesn't make any requests and thus won't check validity. If you try to perform operations within a nonexistent directory, an exception will be raised.
-* `rm`: Supports deleting multiple files provided as arguments. **Warning:** It won't report any errors if at least one deletion succeeds.
+* `rm`: Supports deleting multiple files or folders provided as arguments. Note that it deletes recursively. **Warning:** It won't report any errors if at least one deletion succeeds.
 * `rename`: Renames given file. We don't support `mv` and this only supports renaming. Please provide only the file name as the second argument as in `rename /temp/file1 file2`.
-* `cp`: Do not include file name in the destination. If you wish to rename the copied file, do this `cp /file1 /folder file2`.
+* `cp`: Do not include file name in the destination. If you wish to rename the copied file, do this `cp file1 /folder file2`.
+* `mkdir`: Creates new directories recursively, like when you pass the `-p` switch in the UNIX command. For example, `mkdir folder/subfolder` will create both `subfolder` and `folder` if they don't exist.
 
 The commands below are for downloading and require `aria2c`.
 
